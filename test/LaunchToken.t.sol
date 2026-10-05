@@ -6,6 +6,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Errors} from "@openzeppelin/contracts/interfaces/IERC6093.sol";
 import {LaunchToken} from "../src/LaunchToken.sol";
 
+/// forge-config: default.fuzz.runs = 1000
 contract LaunchTokenTest is Test {
     LaunchToken private token;
     uint256 private constant SUPPLY = 1_000_000_000 ether;
@@ -111,6 +112,94 @@ contract LaunchTokenTest is Test {
         vm.prank(ALICE);
         token.transferFrom(address(this), BOB, 1);
         assertEq(token.balanceOf(address(this)), SUPPLY);
+    }
+
+    function test_oneWeiAndEntireSupplyCanMoveAndReturn() public {
+        assertTrue(token.transfer(ALICE, 1));
+        assertEq(token.balanceOf(ALICE), 1);
+        assertTrue(token.transfer(ALICE, SUPPLY - 1));
+        assertEq(token.balanceOf(address(this)), 0);
+        assertEq(token.balanceOf(ALICE), SUPPLY);
+        vm.prank(ALICE);
+        assertTrue(token.transfer(address(this), SUPPLY));
+        assertEq(token.balanceOf(address(this)), SUPPLY);
+        assertEq(token.balanceOf(ALICE), 0);
+        assertEq(token.totalSupply(), SUPPLY);
+    }
+
+    function test_selfTransferFromConsumesAllowanceButPreservesBalance() public {
+        token.approve(ALICE, SUPPLY);
+        vm.prank(ALICE);
+        assertTrue(token.transferFrom(address(this), address(this), SUPPLY));
+        assertEq(token.allowance(address(this), ALICE), 0);
+        assertEq(token.balanceOf(address(this)), SUPPLY);
+        assertEq(token.totalSupply(), SUPPLY);
+    }
+
+    function test_failedTransferFromToZeroRollsBackAllowance() public {
+        token.approve(ALICE, 1);
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidReceiver.selector, address(0)));
+        vm.prank(ALICE);
+        token.transferFrom(address(this), address(0), 1);
+        assertEq(token.allowance(address(this), ALICE), 1);
+        assertEq(token.balanceOf(address(this)), SUPPLY);
+        assertEq(token.balanceOf(address(0)), 0);
+        assertEq(token.totalSupply(), SUPPLY);
+    }
+
+    function test_zeroTransferFromNeedsNoAllowanceButStillRejectsZeroAddresses() public {
+        vm.prank(ALICE);
+        assertTrue(token.transferFrom(address(this), BOB, 0));
+        // transferFrom validates the allowance owner before reaching the transfer's sender check.
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidApprover.selector, address(0)));
+        vm.prank(ALICE);
+        token.transferFrom(address(0), BOB, 0);
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InvalidReceiver.selector, address(0)));
+        vm.prank(ALICE);
+        token.transferFrom(address(this), address(0), 0);
+        assertEq(token.allowance(address(this), ALICE), 0);
+        assertEq(token.balanceOf(address(this)), SUPPLY);
+        assertEq(token.balanceOf(BOB), 0);
+        assertEq(token.totalSupply(), SUPPLY);
+    }
+
+    function test_maximumAmountCannotOverflowBalanceOrSpendAllowance() public {
+        uint256 maximum = type(uint256).max;
+        token.approve(ALICE, maximum - 1);
+        vm.expectRevert(
+            abi.encodeWithSelector(IERC20Errors.ERC20InsufficientBalance.selector, address(this), SUPPLY, maximum - 1)
+        );
+        vm.prank(ALICE);
+        token.transferFrom(address(this), BOB, maximum - 1);
+        assertEq(token.allowance(address(this), ALICE), maximum - 1);
+
+        token.approve(ALICE, maximum);
+        vm.expectRevert(
+            abi.encodeWithSelector(IERC20Errors.ERC20InsufficientBalance.selector, address(this), SUPPLY, maximum)
+        );
+        vm.prank(ALICE);
+        token.transferFrom(address(this), BOB, maximum);
+        assertEq(token.allowance(address(this), ALICE), maximum);
+        vm.expectRevert(
+            abi.encodeWithSelector(IERC20Errors.ERC20InsufficientBalance.selector, address(this), SUPPLY, maximum)
+        );
+        token.transfer(BOB, maximum);
+        assertEq(token.balanceOf(address(this)), SUPPLY);
+        assertEq(token.balanceOf(BOB), 0);
+        assertEq(token.totalSupply(), SUPPLY);
+    }
+
+    function test_replacingInfiniteApprovalWithFiniteApprovalLimitsSpending() public {
+        token.approve(ALICE, type(uint256).max);
+        token.approve(ALICE, 1);
+        vm.prank(ALICE);
+        assertTrue(token.transferFrom(address(this), BOB, 1));
+        assertEq(token.allowance(address(this), ALICE), 0);
+        vm.expectRevert(abi.encodeWithSelector(IERC20Errors.ERC20InsufficientAllowance.selector, ALICE, 0, 1));
+        vm.prank(ALICE);
+        token.transferFrom(address(this), BOB, 1);
+        assertEq(token.balanceOf(BOB), 1);
+        assertEq(token.balanceOf(address(this)), SUPPLY - 1);
     }
 
     function test_noMintBurnOrAdministrationEvenForDeployer() public {

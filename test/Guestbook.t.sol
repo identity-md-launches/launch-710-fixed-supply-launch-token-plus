@@ -4,6 +4,17 @@ pragma solidity 0.8.26;
 import {Test} from "forge-std/Test.sol";
 import {Guestbook} from "../src/Guestbook.sol";
 
+contract GuestbookCaller {
+    function sign(Guestbook book, string calldata message) external returns (uint256) {
+        return book.sign(message);
+    }
+
+    function pause(Guestbook book) external {
+        book.setPaused(true);
+    }
+}
+
+/// forge-config: default.fuzz.runs = 1000
 contract GuestbookTest is Test {
     Guestbook private book;
     address private constant OWNER = address(0xA11CE);
@@ -104,6 +115,74 @@ contract GuestbookTest is Test {
         book.sign("contract caller");
         assertTrue(book.hasSigned(address(this)));
         assertEq(book.entryAt(0).signer, address(this));
+    }
+
+    function test_forwardedCallsUseCallingContractIdentity() public {
+        GuestbookCaller first = new GuestbookCaller();
+        GuestbookCaller second = new GuestbookCaller();
+        uint256 timestamp = block.timestamp;
+        vm.startPrank(ALICE, ALICE);
+        assertEq(first.sign(book, "first contract"), 0);
+        assertEq(second.sign(book, "second contract"), 1);
+        assertEq(book.sign("direct caller"), 2);
+        vm.stopPrank();
+        vm.expectRevert(abi.encodeWithSelector(Guestbook.AlreadySigned.selector, address(first)));
+        vm.prank(BOB, BOB);
+        first.sign(book, "different origin cannot rewrite");
+        assertEq(book.entryCount(), 3);
+        _assertEntry(0, address(first), "first contract", timestamp);
+        _assertEntry(1, address(second), "second contract", timestamp);
+        _assertEntry(2, ALICE, "direct caller", timestamp);
+        assertFalse(book.hasSigned(BOB));
+    }
+
+    function test_ownerOriginDoesNotAuthorizeForwardingContract() public {
+        GuestbookCaller caller = new GuestbookCaller();
+        vm.expectRevert(Guestbook.Unauthorized.selector);
+        vm.prank(OWNER, OWNER);
+        caller.pause(book);
+        assertFalse(book.paused());
+        assertEq(book.owner(), OWNER);
+    }
+
+    function test_nonzeroMessagesRoundTripAcrossStorageWordBoundaries() public {
+        uint256[9] memory lengths = [uint256(0), 1, 31, 32, 33, 63, 64, 139, 140];
+        for (uint256 i; i < lengths.length; ++i) {
+            bytes memory message = new bytes(lengths[i]);
+            for (uint256 j; j < message.length; ++j) {
+                message[j] = bytes1(uint8(j + 1));
+            }
+            address signer = address(uint160(0x10000 + i));
+            vm.warp(i);
+            vm.prank(signer);
+            assertEq(book.sign(string(message)), i);
+        }
+        assertEq(book.entryCount(), lengths.length);
+        for (uint256 i; i < lengths.length; ++i) {
+            bytes memory message = new bytes(lengths[i]);
+            for (uint256 j; j < message.length; ++j) {
+                message[j] = bytes1(uint8(j + 1));
+            }
+            _assertEntry(i, address(uint160(0x10000 + i)), string(message), i);
+        }
+    }
+
+    function testFuzz_invalidLookupsCannotAliasExistingEntries(uint256 rawIndex, uint160 rawSigner) public {
+        uint256 timestamp = block.timestamp;
+        vm.prank(ALICE);
+        book.sign("first");
+        vm.prank(BOB);
+        book.sign("second");
+        uint256 index = bound(rawIndex, 2, type(uint256).max);
+        address absent = address(uint160(bound(rawSigner, 0x10000, type(uint160).max)));
+        vm.expectRevert(abi.encodeWithSelector(Guestbook.EntryNotFound.selector, index));
+        book.entryAt(index);
+        vm.expectRevert(abi.encodeWithSelector(Guestbook.SignerNotFound.selector, absent));
+        book.entryBySigner(absent);
+        assertFalse(book.hasSigned(absent));
+        assertEq(book.entryCount(), 2);
+        _assertEntry(0, ALICE, "first", timestamp);
+        _assertEntry(1, BOB, "second", timestamp);
     }
 
     function test_ownerHasNoSigningExemption() public {
