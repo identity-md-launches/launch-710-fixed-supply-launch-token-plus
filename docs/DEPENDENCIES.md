@@ -1,0 +1,51 @@
+# Vendored dependencies
+
+Copied without modification from the local vendor mirrors. No package installation or git submodules are needed.
+
+- `forge-std`: mirror package version `1.17.0`; only the required OpenZeppelin ERC-20 files and the forge-std source tree are included. Licenses are retained in each directory.
+- `openzeppelin-contracts`: mirror package version `5.7.0`; only the required OpenZeppelin ERC-20 files and the forge-std source tree are included. Licenses are retained in each directory.
+
+Exact SHA-256 digests of the delivered dependency bytes:
+
+```text
+50b6bf8bdb63265ce14953b480b7aaa0271e78f56843b99c184abd3ae5048cd7  lib/forge-std/LICENSE-APACHE
+6d185dfe089d4de346d391fc5997fbd4739bad1d6556010413c10f420d704ecc  lib/forge-std/LICENSE-MIT
+76b05dda37981797d3d403f29fc6cad79b46e2fc11da47d649ff13acb69158b2  lib/forge-std/src/Base.sol
+850649e2ede6e0e1384ba00eba1335a7af7e97643c731a4587335c0f51f67041  lib/forge-std/src/Config.sol
+0b789ace36e54d1746d08b9b161f5ab4c2fa55c8d30808421349ae33f703c797  lib/forge-std/src/LibVariable.sol
+172a6201241215bdc1f552197f9950e4d2ab7f56dd1e1b992dc51dc71d4e17a1  lib/forge-std/src/Script.sol
+203de35565c3d68b6599f84e88068f79c23b53a80d18c46056e85d4c5f48613c  lib/forge-std/src/StdAssertions.sol
+981b7ce12f4bc3193c7914c68f51be74d1d03c33732db894f5d36ad8025ab4f5  lib/forge-std/src/StdChains.sol
+988843996b3e8ebab594c659fba9502bab437220f84e7ded9a9e3f6e730d358e  lib/forge-std/src/StdCheats.sol
+9a35d96aac1abda2c5356a031ac5ea71cbece6bd8bc3dcf4bed98518cd2d1b61  lib/forge-std/src/StdConfig.sol
+17dfd996881264de1e6af6697a3dc7a56ae8ff0717e4cb4f1685bd7fb3a45147  lib/forge-std/src/StdConstants.sol
+c1f7271f11a44628810ef6beb2da0c43add131ff9cfcac4d7acd633c269ccf7d  lib/forge-std/src/StdError.sol
+7d3a62087c7d06766e99f8e4f4e50997b0ff8730fb304986f2c4cd895a67fbbd  lib/forge-std/src/StdInvariant.sol
+433c8ca2b3ae87e2f8a5b5902dc55446528ffd6b8e1af8a333f2eff4403e5620  lib/forge-std/src/StdJson.sol
+7224cea66fc06c7a9d303084cccb14eaedffe4b21b3f9695d06dc590d2894d7d  lib/forge-std/src/StdMath.sol
+3bab3dab8484edfec81f69d001f55817231b5c276aec067ac0ddc7ba57500bd1  lib/forge-std/src/StdSecp256k1.sol
+cd3e30147de813618446c9eed8c07b8c14ee6989c3b5ad608f72af3b17adedf9  lib/forge-std/src/StdStorage.sol
+903ea6f4e4aa31e416b5043abecc09ced41dc78c9ce9dabb5c745337ee13139d  lib/forge-std/src/StdStyle.sol
+682e9c74bd02de5df7be595d27fa44eeaf0a5d96ad5c2db507065386d35eb433  lib/forge-std/src/StdToml.sol
+52d713d886305184e7ed3b3a2e5941ea1440f071d9c9a4d6fea618135e1d3f67  lib/forge-std/src/StdUtils.sol
+6ac6a04a9723f3b51a86fcd0c4cf02e8011f112df052a8eea8e986d85b0bb3d7  lib/forge-std/src/Test.sol
+cd0cd6ce532f99e9d6e21a97a3f188804537ceb91540226b5e7e922b2e3b4923  lib/forge-std/src/Vm.sol
+894dc6e40fe62d887df6243112d8c775df2db60babc3024ee04a5564b90af64d  lib/forge-std/src/console.sol
+62d8ccbd118fec4f99c5e847322d6ca0d7fbe6a0a16e5a26b0590869fcd69357  lib/forge-std/src/console2.sol
+d10916158da2bbecc56364cda787da303b57313d478c150b1c79ac05d3b2936c  lib/forge-std/src/interfaces/IERC1155.sol
+d9bea769cd3aa52c5dfbfe7b447a63b00ab22baaa4f9d2af789f44553078a27b  lib/forge-std/src/interfaces/IERC165.sol
+cb4bf7f4c0bc513e2c82f251a84e67d2e950cef12e570f40a0d4880b2e25fc9f  lib/forge-std/src/interfaces/IERC20.sol
+5b9da91e1215dc84a606c06f636b34582aec6cdf35ae828dce3852f727d9278e  lib/forge-std/src/interfaces/IERC4626.sol
+44ef6ba5ab803241ed5992f35606820322e2df5947da488870c78f2181d97840  lib/forge-std/src/interfaces/IERC6909.sol
+2e6e000940bf5278cf64f170ac839682667368a5aee7222b312e255ec8eda275  lib/forge-std/src/interfaces/IERC721.sol
+5b9e0d90816f47628b2023351c84e9b8d8667f685c98234742be99dc8eaf2fb6  lib/forge-std/src/interfaces/IERC7540.sol
+15163bc29d96c6b905b53da06e243fbd2ae6b7c8984b8306ff4c9b0716ec055b  lib/forge-std/src/interfaces/IERC7575.sol
+890a5b361034daa6006b3ba2275e743cd6197c4d81e3df5732cdce731d3c0868  lib/forge-std/src/interfaces/IMulticall3.sol
+fd74d8ed377e1470217cd6dce7699dcbc4e79b3893f17ae2a298c0e7e4418181  lib/forge-std/src/safeconsole.sol
+20aebc68b11c063133aa2af0ef4bb29875477c6d16d715718f0daec563938b84  lib/openzeppelin-contracts/LICENSE
+d56b4239e73bbaa9f5426d1e7b3bd8064a59cbd0f575d3538a0be1e5812fa86b  lib/openzeppelin-contracts/contracts/interfaces/IERC6093.sol
+acb04d2fd908e2e4d76d5a964fdb46aded638a927c0b05c29d690fd435650e2e  lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol
+01b6f5c4fa45fd38822b286ecef6daf983d27306dd6362496fa71b3e4600b72c  lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol
+0b7132f17d14d1d84b41b0bb429be62dafdff00fd3470f68724d8018eb07f57a  lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol
+847fda5460fee70f56f4200f59b82ae622bb03c79c77e67af010e31b7e2cc5b6  lib/openzeppelin-contracts/contracts/utils/Context.sol
+```
