@@ -1,0 +1,22 @@
+{
+  "kind": "evm_project",
+  "token": {
+    "contract": "LaunchToken",
+    "name": "Guestbook",
+    "symbol": "GUEST",
+    "decimals": 18
+  },
+  "contracts": [
+    {
+      "contract": "Guestbook",
+      "constructorArgs": ["$owner"]
+    }
+  ],
+  "pool": {
+    "pairedCurrency": "0x0000000000000000000000000000000000000000",
+    "fee": 3000,
+    "tickSpacing": 60,
+    "initialPrice": "79228162514264337593543950336"
+  },
+  "notes": "LaunchToken is a fixed-supply ERC-20 with no constructor arguments. Guestbook is independent of the token and is fully configured by its nonpayable constructor with the policy-provided $owner as its immutable owner. Each address may sign once while unpaused with a message of at most 140 bytes; empty messages are allowed. Entries store the signer, timestamp and message and remain readable by index and signer while paused. Only the owner can pause or resume new signatures; entries cannot be edited or deleted, and ownership cannot be transferred. Signing requires no tokens or payment. No initialization calls are needed."
+}
